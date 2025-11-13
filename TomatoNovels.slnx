@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TomatoNovels/TomatoNovels.Client/TomatoNovels.Client.csproj" />
+  <Project Path="TomatoNovels/TomatoNovels/TomatoNovels.csproj" />
+</Solution>
