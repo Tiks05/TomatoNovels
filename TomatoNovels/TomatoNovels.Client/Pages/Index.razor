@@ -1,0 +1,9 @@
+﻿@page "/"
+@inject Utils.NavigationHelper Nav
+
+@code {
+    protected override void OnInitialized()
+    {
+        Nav.GoTo("/login", true);
+    }
+}

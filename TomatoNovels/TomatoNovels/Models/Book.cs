@@ -91,7 +91,7 @@ public partial class Book
     /// 更新时间
     /// </summary>
     [Column("updated_at", TypeName = "datetime")]
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// 被收藏数量

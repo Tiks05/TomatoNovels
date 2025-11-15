@@ -1,0 +1,133 @@
+﻿@page "/login/pwd"
+@layout LoginLayout
+@using System.ComponentModel.DataAnnotations
+@using TomatoNovels.Client.Services
+@using TomatoNovels.Client.Stores
+
+@inject NavigationManager Nav
+@inject AuthApi Auth
+@inject IJSRuntime JS
+@inject UserStore UserStore
+
+<!-- 返回箭头 + 标题 -->
+<div class="flex items-center text-[16px] font-medium text-black mb-6 cursor-pointer transition-colors hover:text-[#ff8140]"
+     @onclick='() => GoTo("/login/sms")'>
+    <img src="/assets/icons/arrow-left/icons8-arrow-50.png"
+         class="w-4 h-4 mr-1.5 inline-block align-middle object-contain" />
+    密码登录
+</div>
+
+<EditForm Model="@form" OnValidSubmit="HandleLogin" class="flex flex-col gap-4">
+    <DataAnnotationsValidator />
+
+    <!-- 手机号 -->
+    <div>
+        <InputText @bind-Value="form.Account"
+                   type="text"
+                   placeholder="请输入手机号"
+                   class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none" />
+        <ValidationMessage For="@(() => form.Account)" class="text-xs text-red-500 mt-1" />
+    </div>
+
+    <!-- 密码输入 -->
+    <div class="relative">
+        <InputText @bind-Value="form.Password"
+                   type="password"
+                   placeholder="请输入密码"
+                   class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none pr-24" />
+        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] text-[#999] cursor-pointer transition-colors hover:text-[#ff8140]"
+              @onclick='() => GoTo("/login/reset")'>
+            忘记密码
+        </span>
+        <ValidationMessage For="@(() => form.Password)" class="text-xs text-red-500 mt-1" />
+    </div>
+
+    <!-- 协议 -->
+    <div class="flex items-start text-[12px] text-[#999] mt-5">
+        <InputCheckbox @bind-Value="form.Agree"
+                       class="mt-[2px] h-4 w-4 inline-block align-top cursor-pointer rounded-[3px] border border-[#dcdfe6] accent-[#ff8140]" />
+        <span class="ml-1.5 mt-[3px] leading-[18px]">
+            我已阅读并同意
+            <a class="text-[#999] no-underline cursor-pointer transition-colors border-b border-[#ccc] pb-[1px] hover:text-[#ff8140]">
+                用户协议
+            </a>
+            和
+            <a class="text-[#999] no-underline cursor-pointer transition-colors border-b border-[#ccc] pb-[1px] hover:text-[#ff8140]">
+                隐私政策
+            </a>
+        </span>
+    </div>
+
+    <!-- 登录按钮 -->
+    <button type="button"
+            class="@ButtonClass"
+            disabled="@(!CanSubmit)"
+            @onclick="OnClickLogin">
+        登录
+    </button>
+</EditForm>
+
+@code {
+    // 表单字段
+    public class LoginForm
+    {
+        [Required(ErrorMessage = "请输入手机号")]
+        public string Account { get; set; } = "";
+
+        [Required(ErrorMessage = "请输入密码")]
+        public string Password { get; set; } = "";
+
+        public bool Agree { get; set; }
+    }
+
+    private LoginForm form = new();
+
+    // 是否能提交
+    private bool CanSubmit =>
+        !string.IsNullOrWhiteSpace(form.Account)
+        && !string.IsNullOrWhiteSpace(form.Password)
+        && form.Agree;
+
+    // Tailwind 按钮样式（根据 CanSubmit 切换渐变 + 鼠标样式）
+    private string ButtonClass =>
+        "w-full h-12 rounded-full text-white text-[16px] font-medium border-0 transition-all duration-200 " +
+        (CanSubmit
+            ? "bg-gradient-to-r from-[#ff8140] to-[#ffa56f] cursor-pointer"
+            : "bg-gradient-to-r from-[#ffd8c2] to-[#ffe9df] cursor-not-allowed");
+
+    // 点击按钮（防止多次提交）
+    private async Task OnClickLogin()
+    {
+        if (CanSubmit)
+            await HandleLogin();
+    }
+
+    // 登录逻辑
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var res = await Auth.LoginByPassword(form.Account, form.Password);
+
+            if (res.Data is null)
+            {
+                await JS.InvokeVoidAsync("alert", "登录失败：服务器返回数据为空");
+                return;
+            }
+
+            // ★ 使用 UserStore 更新状态 + 存 localStorage
+            await UserStore.SetLoginAsync(res.Data);
+
+            await JS.InvokeVoidAsync("alert", "登录成功");
+            Nav.NavigateTo("/home");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"登录失败：{ex.Message}");
+        }
+    }
+
+
+    // 跳转
+    private void GoTo(string url) => Nav.NavigateTo(url);
+}

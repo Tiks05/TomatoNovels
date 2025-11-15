@@ -1,0 +1,85 @@
+﻿@inherits LayoutComponentBase
+@inject Utils.NavigationHelper NavHelper
+
+<!-- 整个登录页容器 -->
+<div class="relative w-[100vw] h-[100vh] overflow-hidden font-['PingFang_SC','Microsoft_YaHei',sans-serif]">
+
+    <!-- 顶部导航 -->
+    <div class="absolute top-[20px] left-0 w-full z-[3] flex justify-between items-center px-[20%] text-[14px] font-medium text-white pointer-events-none">
+
+        <!-- 左侧 Logo + 标题 + 作家专区 -->
+        <div class="text-[20px] leading-none h-[24px] flex items-center pointer-events-auto cursor-pointer"
+             @onclick='() => NavHelper.GoTo("/home")'>
+
+            <img src="@Logo" class="w-[26px] mr-[8px] object-contain" />
+            番茄小说网
+
+            <span class="mx-[8px] text-white/70 text-[14px] select-none font-normal">|</span>
+
+            <span class="text-[14px] cursor-pointer transition-colors duration-200 hover:text-[#ff8140]"
+                  @onclick:stopPropagation="true"
+                  @onclick='() => NavHelper.GoTo("/writer")'>
+                作家专区
+            </span>
+        </div>
+
+        <!-- 右侧 游客登录 / 作家福利 -->
+        <div class="flex gap-[24px] pointer-events-auto">
+            <span class="text-[14px] cursor-pointer transition-colors duration-200 hover:text-[#ff8140]"
+                  @onclick='() => NavHelper.GoTo("/home")'>
+                游客登录
+            </span>
+            <span class="text-[14px] cursor-pointer transition-colors duration-200 hover:text-[#ff8140]"
+                  @onclick='() => NavHelper.GoTo("/benefit")'>
+                作家福利
+            </span>
+        </div>
+    </div>
+
+    <!-- 懒加载封面（视频未加载时显示） -->
+    @if (!VideoLoaded)
+    {
+        <img src="@Poster"
+             alt="背景加载中..."
+             class="absolute top-0 left-0 w-full h-full object-cover z-0" />
+    }
+
+    <!-- 背景视频：加载前先隐藏，加载完成后显示 -->
+    <video class="absolute top-0 left-0 w-full h-full object-cover z-0 @(VideoLoaded ? "" : "hidden")"
+           autoplay
+           muted
+           loop
+           playsinline
+           @oncanplaythrough="OnVideoLoaded">
+        <source src="@VideoSrc" type="video/webm" />
+    </video>
+
+    <!-- 遮罩 -->
+    <div class="absolute top-0 left-0 w-full h-full bg-[rgba(0,0,0,0.25)] z-[1]"></div>
+
+    <!-- 登录表单区域（右侧卡片） -->
+    <div class="absolute top-1/2 right-[100px] translate-y-[-50%] z-[2] flex justify-end w-full">
+        <div class="w-[400px] p-[40px_32px] bg-white rounded-[16px] shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+            @Body
+            @* 子页面（短信登录/密码登录/重置密码） *@
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="absolute bottom-[20px] left-1/2 -translate-x-1/2 text-[12px] text-white/60 z-[2]">
+        ©2025 番茄小说 | 本系统仅供学习与教学使用
+    </div>
+</div>
+
+@code {
+    // 对应 Vue 里的 videoLoaded
+    private bool VideoLoaded = false;
+
+    // 静态资源路径：放在 wwwroot/assets/... 下即可
+    private string Poster => "/assets/images/auth/welcome.png";
+    private string VideoSrc => "/assets/movies/auth/welcome.webm";
+    private string Logo => "/assets/icons/logo/icons8-firebase-undefined-32.png";
+
+    private void OnVideoLoaded()
+        => VideoLoaded = true;
+}

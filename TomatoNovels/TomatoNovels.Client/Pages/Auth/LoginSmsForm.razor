@@ -1,0 +1,180 @@
+﻿@page "/login/sms"
+@layout LoginLayout
+@using System.ComponentModel.DataAnnotations
+@using TomatoNovels.Client.Services
+@inject NavigationManager Nav
+@inject AuthApi Auth
+@inject IJSRuntime JS
+
+<div>
+    <!-- 顶部切换标签 -->
+    <div class="flex text-[16px] font-normal text-[#999] mb-6">
+        <span class="mr-6 cursor-default text-black font-medium">验证码登录</span>
+    </div>
+
+    <EditForm Model="@form" OnValidSubmit="HandleLogin" class="flex flex-col gap-4">
+        <DataAnnotationsValidator />
+
+        <!-- 手机号 -->
+        <div>
+            <InputText @bind-Value="form.Phone"
+                       type="text"
+                       placeholder="手机号"
+                       class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none" />
+            <ValidationMessage For="@(() => form.Phone)" class="text-xs text-red-500 mt-1" />
+        </div>
+
+        <!-- 验证码 + 按钮 -->
+        <div class="flex items-center gap-2">
+            <InputText @bind-Value="form.Code"
+                       type="text"
+                       placeholder="请输入验证码"
+                       class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none min-w-0" />
+            <button type="button"
+                    class="@CodeButtonClass"
+                    disabled="@(!CanSendCode)"
+                    @onclick="OnSendCode">
+                @(Countdown > 0 ? $"{Countdown}s" : "获取验证码")
+            </button>
+        </div>
+        <ValidationMessage For="@(() => form.Code)" class="text-xs text-red-500 mt-1" />
+
+        <!-- 协议 -->
+        <div class="flex items-start text-[12px] text-[#999] mt-5">
+            <InputCheckbox @bind-Value="form.Agree"
+                           class="mt-[2px] h-4 w-4 inline-block align-top cursor-pointer rounded-[3px] border border-[#dcdfe6] accent-[#ff8140]" />
+
+            <span class="ml-1.5 mt-[3px] leading-[18px]">
+                我已阅读并同意
+                <a class="text-[#999] no-underline cursor-pointer transition-colors border-b border-[#ccc] pb-[1px] hover:text-[#ff8140]">
+                    用户协议
+                </a>
+                和
+                <a class="text-[#999] no-underline cursor-pointer transition-colors border-b border-[#ccc] pb-[1px] hover:text-[#ff8140]">
+                    隐私政策
+                </a>
+            </span>
+        </div>
+
+        <!-- 登录按钮 -->
+        <button type="button"
+                class="@LoginButtonClass"
+                disabled="@(!CanSubmit)"
+                @onclick="OnClickLogin">
+            登录/注册
+        </button>
+
+        <!-- 切换密码登录 -->
+        <div class="text-[12px] text-[#999] text-center mt-[5px] cursor-pointer transition-colors hover:text-[#ff8140]"
+             @onclick='() => GoTo("/login/pwd")'>
+            密码登录
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    public class SmsLoginForm
+    {
+        [Required(ErrorMessage = "请输入手机号")]
+        [RegularExpression(@"^1[3-9]\d{9}$", ErrorMessage = "手机号格式不正确")]
+        public string Phone { get; set; } = "";
+
+        [Required(ErrorMessage = "请输入验证码")]
+        public string Code { get; set; } = "";
+
+        public bool Agree { get; set; }
+    }
+
+    private SmsLoginForm form = new();
+    private int Countdown = 0;
+    private System.Timers.Timer? countdownTimer;
+
+    // 校验逻辑
+    private bool IsPhoneValid =>
+        !string.IsNullOrWhiteSpace(form.Phone)
+        && System.Text.RegularExpressions.Regex.IsMatch(form.Phone, @"^1[3-9]\d{9}$");
+
+    private bool CanSendCode => IsPhoneValid && form.Agree && Countdown == 0;
+
+    private bool CanSubmit =>
+        IsPhoneValid
+        && !string.IsNullOrWhiteSpace(form.Code)
+        && form.Agree;
+
+    // Tailwind 按钮样式：根据状态切换
+    private string CodeButtonClass =>
+        "w-[120px] h-12 bg-[#f2f2f2] text-[#999] rounded-[10px] text-[14px] px-3 flex-shrink-0 disabled:cursor-not-allowed transition-colors " +
+        (CanSendCode ? "cursor-pointer" : "cursor-not-allowed");
+
+    private string LoginButtonClass =>
+        "w-full h-12 rounded-full text-white text-[16px] font-medium border-0 transition-all duration-200 " +
+        (CanSubmit
+            ? "bg-gradient-to-r from-[#ff8140] to-[#ffa56f] cursor-pointer"
+            : "bg-gradient-to-r from-[#ffd8c2] to-[#ffe9df] cursor-not-allowed");
+
+    private void GoTo(string url) => Nav.NavigateTo(url);
+
+    // 点击“登录/注册”
+    private async Task OnClickLogin()
+    {
+        if (CanSubmit)
+            await HandleLogin();
+    }
+
+    // 登录处理
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var res = await Auth.LoginByCode(form.Phone, form.Code);
+
+            if (!string.IsNullOrWhiteSpace(res.Data?.Token))
+                await JS.InvokeVoidAsync("localStorage.setItem", "token", res.Data.Token);
+
+            await JS.InvokeVoidAsync("alert", "登录成功！");
+            Nav.NavigateTo("/home");
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"登录失败：{ex.Message}");
+        }
+    }
+
+    // 发送验证码
+    private async Task OnSendCode()
+    {
+        if (!CanSendCode) return;
+
+        try
+        {
+            await Auth.SendCode(form.Phone);
+            await JS.InvokeVoidAsync("alert", "验证码已发送");
+            StartCountdown();
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"发送失败：{ex.Message}");
+        }
+    }
+
+    // 倒计时
+    private void StartCountdown()
+    {
+        Countdown = 60;
+
+        countdownTimer = new System.Timers.Timer(1000);
+        countdownTimer.Elapsed += (s, e) =>
+        {
+            if (Countdown <= 0)
+            {
+                countdownTimer?.Stop();
+            }
+            else
+            {
+                Countdown--;
+                InvokeAsync(StateHasChanged);
+            }
+        };
+        countdownTimer.Start();
+    }
+}

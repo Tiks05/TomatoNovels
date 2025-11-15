@@ -17,8 +17,6 @@ public partial class AppDbContext : DbContext
     {
     }
 
-    public virtual DbSet<AlembicVersion> AlembicVersions { get; set; }
-
     public virtual DbSet<Book> Books { get; set; }
 
     public virtual DbSet<Chapter> Chapters { get; set; }
@@ -46,11 +44,6 @@ public partial class AppDbContext : DbContext
         modelBuilder
             .UseCollation("utf8mb4_0900_ai_ci")
             .HasCharSet("utf8mb4");
-
-        modelBuilder.Entity<AlembicVersion>(entity =>
-        {
-            entity.HasKey(e => e.VersionNum).HasName("PRIMARY");
-        });
 
         modelBuilder.Entity<Book>(entity =>
         {

@@ -1,0 +1,134 @@
+﻿@page "/login/reset"
+@layout LoginLayout
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<!-- 返回箭头 + 标题 -->
+<div class="flex items-center text-[16px] font-medium text-black mb-6 cursor-pointer"
+     @onclick='() => GoTo("/login/pwd")'>
+    <img src="/assets/icons/arrow-left/icons8-arrow-50.png"
+         class="w-4 h-4 mr-1.5 object-contain" />
+    密码重置
+</div>
+
+<EditForm Model="@form" OnValidSubmit="HandleSubmit" class="flex flex-col gap-4">
+    <DataAnnotationsValidator />
+
+    <!-- 账号 -->
+    <div>
+        <InputText @bind-Value="form.Account"
+                   type="text"
+                   placeholder="请输入手机号/邮箱"
+                   class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none" />
+        <ValidationMessage For="@(() => form.Account)" class="text-xs text-red-500 mt-1" />
+    </div>
+
+    <!-- 新密码 -->
+    <div>
+        <InputText @bind-Value="form.Password"
+                   type="password"
+                   placeholder="请输入新密码"
+                   class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none" />
+        <ValidationMessage For="@(() => form.Password)" class="text-xs text-red-500 mt-1" />
+    </div>
+
+    <!-- 确认密码 -->
+    <div>
+        <InputText @bind-Value="form.Confirm"
+                   type="password"
+                   placeholder="密码确认"
+                   class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none" />
+        <ValidationMessage For="@(() => form.Confirm)" class="text-xs text-red-500 mt-1" />
+    </div>
+
+    <!-- 验证码 + 按钮 -->
+    <div class="flex items-center gap-2">
+        <InputText @bind-Value="form.Code"
+                   type="text"
+                   placeholder="请输入验证码"
+                   class="bg-[#f7f7f7] rounded-[10px] h-12 px-[18px] text-[14px] w-full outline-none border-none shadow-none" />
+        <button type="button"
+                class="@CodeButtonClass"
+                disabled="@(!CanSendCode)"
+                @onclick="HandleSendCode">
+            获取验证码
+        </button>
+    </div>
+    <ValidationMessage For="@(() => form.Code)" class="text-xs text-red-500 mt-1" />
+
+    <!-- 提交按钮 -->
+    <button type="button"
+            class="@SubmitButtonClass"
+            disabled="@(!CanSubmit)"
+            @onclick="OnClickSubmit">
+        提交
+    </button>
+</EditForm>
+
+@code {
+    public class ResetForm
+    {
+        [Required(ErrorMessage = "请输入手机号/邮箱")]
+        public string Account { get; set; } = "";
+
+        [Required(ErrorMessage = "请输入新密码")]
+        public string Password { get; set; } = "";
+
+        [Required(ErrorMessage = "请确认密码")]
+        [Compare(nameof(Password), ErrorMessage = "两次密码不一致")]
+        public string Confirm { get; set; } = "";
+
+        [Required(ErrorMessage = "请输入验证码")]
+        public string Code { get; set; } = "";
+    }
+
+    private ResetForm form = new();
+
+    private bool CanSendCode =>
+        !string.IsNullOrWhiteSpace(form.Account);
+
+    private bool CanSubmit =>
+        !string.IsNullOrWhiteSpace(form.Account)
+        && !string.IsNullOrWhiteSpace(form.Password)
+        && !string.IsNullOrWhiteSpace(form.Confirm)
+        && form.Password == form.Confirm
+        && !string.IsNullOrWhiteSpace(form.Code);
+
+    // Tailwind 按钮样式（和前两个页面保持一致）
+    private string CodeButtonClass =>
+        "w-[160px] h-12 bg-[#f2f2f2] text-[#999] rounded-[10px] text-[14px] px-5 cursor-pointer disabled:cursor-not-allowed";
+
+    private string SubmitButtonClass =>
+        "w-full h-12 rounded-full text-white text-[16px] font-medium border-0 transition-all duration-200 " +
+        (CanSubmit
+            ? "bg-gradient-to-r from-[#ff8140] to-[#ffa56f] cursor-pointer"
+            : "bg-gradient-to-r from-[#ffd8c2] to-[#ffe9df] cursor-not-allowed");
+
+    private void GoTo(string url) => Nav.NavigateTo(url);
+
+    // 发送验证码（示例）
+    private async Task HandleSendCode()
+    {
+        if (!CanSendCode) return;
+
+        Console.WriteLine($"📨 发送验证码：{form.Account}");
+        await JS.InvokeVoidAsync("alert", $"验证码已发送到：{form.Account}");
+    }
+
+    private async Task OnClickSubmit()
+    {
+        if (CanSubmit)
+            await HandleSubmit();
+    }
+
+    // 提交（示例逻辑，后面你可以接真实接口）
+    private async Task HandleSubmit()
+    {
+        Console.WriteLine("✅ 重置密码提交：");
+        Console.WriteLine($"Account: {form.Account}, Password: {form.Password}, Code: {form.Code}");
+
+        await JS.InvokeVoidAsync("alert", "提交成功！");
+        Nav.NavigateTo("/login/pwd");
+    }
+}
