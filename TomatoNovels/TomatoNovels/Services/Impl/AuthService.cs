@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using TomatoNovels.Controllers.Auth;
-using TomatoNovels.Controllers.Exceptions;
+using TomatoNovels.Core.Auth;
+using TomatoNovels.Core.Exceptions;
 using TomatoNovels.Data;
 using TomatoNovels.Models;
 using TomatoNovels.Utils;

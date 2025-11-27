@@ -2,11 +2,9 @@
 using System.IdentityModel.Tokens.Jwt; // 需要 System.IdentityModel.Tokens.Jwt 包支持
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using TomatoNovels.Controllers.Auth;
 
-namespace TomatoNovels.Controllers.Auth.Impl
+namespace TomatoNovels.Core.Auth.Impl
 {
     /// <summary>
     /// JWT 生成器，实现等价于 Python 版：

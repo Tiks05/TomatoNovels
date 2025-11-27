@@ -1,0 +1,15 @@
+﻿.bg_bai {
+    background-color: #fff;
+    overflow-x: hidden;
+}
+
+.index_wrapper {
+    width: 1240px;
+    margin: auto;
+}
+
+.ranking_news_wrapper {
+    margin-top: 50px;
+    display: flex;
+    justify-content: space-between;
+}

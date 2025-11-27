@@ -1,0 +1,56 @@
+﻿@inject Utils.NavigationHelper Nav
+@using TomatoNovels.Client.Services
+@using TomatoNovels.Shared.DTOs.Home
+
+@inject HomeApi Home
+
+<div class="adapt_wrapper">
+    <div class="tit">
+        <h2>版权改编</h2>
+        <p>热门版权改编动漫、影视尽在CMS——来CMS，追精品IP原著小说</p>
+        <span @onclick="@(() => Nav.GoTo("/adapt/all"))">查看全部</span>
+    </div>
+
+    <div class="marquee-container">
+        <div class="adapt_list" style="@($"--scroll-duration:{Duration}s")">
+
+            @if (AdaptList is not null && AdaptList.Count > 0)
+            {
+                @foreach (var item in AdaptList)
+                {
+                    <div class="item" @onclick="@(() => Nav.GoTo(item.Path))">
+                        <img src="@item.Pic" alt="" />
+                    </div>
+                }
+
+                @foreach (var item in AdaptList)
+                {
+                    <div class="item">
+                        <img src="@item.Pic" alt="" />
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<AdaptBookOut> AdaptList { get; set; } = new();
+    private double Duration { get; set; } = 30;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // 就像 Auth.LoginByPassword 一样，直接调服务层方法
+        var res = await Home.GetAdaptListAsync(20);
+        AdaptList = res.Data!.Data!;
+        ComputeDuration();
+    }
+
+    private void ComputeDuration()
+    {
+        int itemWidth = 215 + 20;
+        int totalWidth = AdaptList.Count * itemWidth;
+        double speed = 100;
+        Duration = totalWidth / speed;
+    }
+}

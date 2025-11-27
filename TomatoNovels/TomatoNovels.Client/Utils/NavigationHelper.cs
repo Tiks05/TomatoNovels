@@ -5,12 +5,13 @@ namespace TomatoNovels.Client.Utils
 {
     /// <summary>
     /// 封装的导航工具类
-    /// 提供 GoTo(path, replace) 方法，避免重复跳转。
+    /// 提供 GoTo(path, replace) 方法
     /// </summary>
     public class NavigationHelper
     {
         private readonly NavigationManager _nav;
 
+        /// 注入 NavigationManager
         public NavigationHelper(NavigationManager nav)
         {
             _nav = nav;

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TomatoNovels.Shared.ApiResponse;
 
-namespace TomatoNovels.Controllers.Exceptions
+namespace TomatoNovels.Core.Exceptions
 {
     /// <summary>
     /// 全局异常处理中间件，对应 Flask 的 register_error_handlers(app)

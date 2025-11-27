@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using TomatoNovels.Data;
-using TomatoNovels.Shared.DTOs.Module;
+using TomatoNovels.Shared.DTOs.Module.Response;
 
 namespace TomatoNovels.Services.Impl
 {
@@ -19,7 +19,7 @@ namespace TomatoNovels.Services.Impl
             _http = http;
         }
 
-        public async Task<List<BannerItemDto>> GetBannerListAsync(int limit)
+        public async Task<List<BannerListResponseDto>> GetBannerListAsync(int limit)
         {
             // === 完全对应 Flask SQLAlchemy ===
             var records = await _db.News
@@ -33,7 +33,7 @@ namespace TomatoNovels.Services.Impl
             var scheme = http?.Request.Scheme ?? "http";
             var host = http?.Request.Host.Value;
 
-            var list = new List<BannerItemDto>();
+            var list = new List<BannerListResponseDto>();
 
             foreach (var r in records)
             {
@@ -44,7 +44,7 @@ namespace TomatoNovels.Services.Impl
                     bannerUrl = $"{scheme}://{host}{NormalizePath(r.BannerUrl)}";
                 }
 
-                list.Add(new BannerItemDto
+                list.Add(new BannerListResponseDto
                 {
                     BannerUrl = bannerUrl,
                     Path = $"/classroom/{r.Id}"   // 完全对标 Flask

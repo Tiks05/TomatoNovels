@@ -6,9 +6,9 @@ using TomatoNovels.Client.ApiRequest;
 using TomatoNovels.Client.Utils;
 using TomatoNovels.Client.Stores;
 using TomatoNovels.Components;
-using TomatoNovels.Controllers.Auth;
-using TomatoNovels.Controllers.Auth.Impl;
-using TomatoNovels.Controllers.Exceptions;
+using TomatoNovels.Core.Exceptions;
+using TomatoNovels.Core.Auth;
+using TomatoNovels.Core.Auth.Impl;
 using TomatoNovels.Data;
 using TomatoNovels.Services;
 using TomatoNovels.Services.Impl;
@@ -66,13 +66,14 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBookInfoService, BookInfoService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<ILayoutService, LayoutService>();
 builder.Services.AddScoped<ILibraryService, LibraryService>();
 builder.Services.AddScoped<IModuleService, ModuleService>();
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
 builder.Services.AddScoped<IWriterService, WriterService>();
 builder.Services.AddScoped<IWriterInfoService, WriterInfoService>();
-builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<NavigationHelper>();
 builder.Services.AddScoped<UserStore>();
 
@@ -105,6 +106,8 @@ builder.Services.AddScoped(sp =>
 
 builder.Services.AddScoped<ApiRequest>();
 builder.Services.AddScoped<AuthApi>();
+builder.Services.AddScoped<HomeApi>();
+builder.Services.AddScoped<ModuleApi>();
 
 var app = builder.Build();
 
@@ -129,7 +132,7 @@ app.UseHttpsRedirection();
 // 提供静态文件（头像、封面等）
 app.UseStaticFiles();
 
-// 全局 API 异常捕获（必须放在 MapControllers 之前）
+// 全局 API 异常捕获
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // 防 CSRF

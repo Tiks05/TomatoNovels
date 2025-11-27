@@ -115,7 +115,7 @@
                 return;
             }
 
-            // ★ 使用 UserStore 更新状态 + 存 localStorage
+            // UserStore 更新状态 + 存 localStorage
             await UserStore.SetLoginAsync(res.Data);
 
             await JS.InvokeVoidAsync("alert", "登录成功");

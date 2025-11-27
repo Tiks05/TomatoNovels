@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using TomatoNovels.Shared.DTOs.Module;
+using TomatoNovels.Shared.DTOs.Module.Response;
 
 namespace TomatoNovels.Services
 {
@@ -13,6 +13,6 @@ namespace TomatoNovels.Services
         /// 获取首页 Banner 列表
         /// </summary>
         /// <param name="limit">最多返回多少条</param>
-        Task<List<BannerItemDto>> GetBannerListAsync(int limit);
+        Task<List<BannerListResponseDto>> GetBannerListAsync(int limit);
     }
 }

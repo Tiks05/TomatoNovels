@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using TomatoNovels.Shared.DTOs.BookInfo;
-using TomatoNovels.Controllers.Exceptions;
+using TomatoNovels.Core.Exceptions;
 using TomatoNovels.Data;
 using TomatoNovels.Models;
 

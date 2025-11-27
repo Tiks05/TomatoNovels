@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TomatoNovels.Shared.DTOs.Home
+namespace TomatoNovels.Shared.DTOs.Home.Response
 {
-    public class NewsOut
+    public class NewsResponseDto
     {
         [JsonPropertyName("title")]
         public string Title { get; set; } = "";

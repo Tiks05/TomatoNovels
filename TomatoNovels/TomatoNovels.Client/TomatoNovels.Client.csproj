@@ -15,9 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Layout\" />
-    <Folder Include="Components\Module\" />
-    <Folder Include="Pages\Home\" />
     <Folder Include="Pages\BookInfo\" />
     <Folder Include="Pages\Comment\" />
     <Folder Include="Pages\Library\" />

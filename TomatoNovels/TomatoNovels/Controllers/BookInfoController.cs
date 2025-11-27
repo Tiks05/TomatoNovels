@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TomatoNovels.Controllers;
 using TomatoNovels.Shared.ApiResponse;
-using TomatoNovels.Controllers.Exceptions;
+using TomatoNovels.Core.Exceptions;
 using TomatoNovels.Services;
 using TomatoNovels.Shared.DTOs.BookInfo;
 

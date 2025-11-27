@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TomatoNovels.Shared.DTOs.Home
+namespace TomatoNovels.Shared.DTOs.Home.Response
 {
-    public class BookRankingOut
+    public class BookRankingResponseDto
     {
         [JsonPropertyName("plot_type")]
         public string PlotType { get; set; } = "";

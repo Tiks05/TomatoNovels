@@ -1,0 +1,58 @@
+﻿@using System.Linq
+@using TomatoNovels.Client.Services
+@using TomatoNovels.Shared.DTOs.Module.Response
+@inject NavigationManager Nav
+@inject ModuleApi Module
+@inject IJSRuntime JS
+
+<div class="index_banner">
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+            @if (BannerList?.Count > 0)
+            {
+                @foreach (var item in BannerList)
+                {
+                    <div class="swiper-slide" @onclick="() => GoTo(item.Path)">
+                        <img src="@item.BannerUrl" alt="" />
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="swiper-pagination"></div>
+    </div>
+</div>
+
+@code {
+    private List<BannerListResponseDto> BannerList { get; set; } = new();
+
+    private bool _swiperInitialized;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await Module.GetBannerListAsync(5);
+
+        if (res.Data != null && res.Data.Any())
+        {
+            BannerList = res.Data.ToList();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // 有数据且还没初始化过，再调用 JS
+        if (!_swiperInitialized && BannerList.Count > 0)
+        {
+            _swiperInitialized = true;
+            await JS.InvokeVoidAsync("initSwiper");
+        }
+    }
+
+    private void GoTo(string path)
+    {
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            Nav.NavigateTo(path);
+        }
+    }
+}

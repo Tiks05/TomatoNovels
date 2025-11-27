@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using TomatoNovels.Controllers.Exceptions;
+using TomatoNovels.Core.Exceptions;
 using TomatoNovels.Data;
 using TomatoNovels.Shared.DTOs.Layout;
-using TomatoNovels.Models;
 
 namespace TomatoNovels.Services.Impl
 {

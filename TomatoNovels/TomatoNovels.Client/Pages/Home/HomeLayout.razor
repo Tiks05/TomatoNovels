@@ -1,0 +1,54 @@
+﻿@page "/home"
+@using TomatoNovels.Client.Components.Layout
+@using TomatoNovels.Client.Components.Module
+@using TomatoNovels.Client.Pages.Home
+@using TomatoNovels.Shared.DTOs.Home
+
+<div class="bg_bai">
+
+    @if (navMenus != null)
+    {
+        <Header Menus="navMenus" />
+    }
+
+    <Banner />
+
+    @if (shortcutList != null)
+    {
+        @* <HomeShortcut Shortcuts="shortcutList" /> *@
+    }
+
+    <div class="index_wrapper">
+        <div class="ranking_news_wrapper">
+            @* <RankingList /> *@
+            @* <NewsList /> *@
+        </div>
+
+        @* <WriterList /> *@
+    </div>
+
+    @* <Recommend /> *@
+    @* <Sort /> *@
+    <Adapt />
+    @* <BookList /> *@
+    @* <Recently /> *@
+    <Footer />
+</div>
+
+@code {
+    private List<MenuItemDto> navMenus = new()
+    {
+        new() { Path = "/home", Label = "首页" },
+        new() { Path = "/library", Label = "书库" },
+        new() { Path = "/bookshelf", Label = "书架" },
+        new() { Path = "/writer", Label = "作家专区" },
+        new() { Path = "/copyright", Label = "版权专区" }
+    };
+
+    private List<ShortcutItemDto> shortcutList = new()
+    {
+        new() { Title = "作家福利", Desc = "番茄作家福利区", Path = "/benefit" },
+        new() { Title = "作家专区", Desc = "创建作品、查看作品数据及收益", Path = "/writer" },
+        new() { Title = "版权专区", Desc = "优秀版权作品展示", Path = "/copyright" }
+    };
+}

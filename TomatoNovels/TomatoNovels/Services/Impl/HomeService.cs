@@ -7,11 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using TomatoNovels.Data;
 using TomatoNovels.Shared.DTOs.Home;
 using TomatoNovels.Models;
+using TomatoNovels.Shared.DTOs.Home.Response;
 
 namespace TomatoNovels.Services.Impl
 {
     /// <summary>
-    /// 首页相关业务逻辑，对应 Python 的 home_service.py
+    /// 首页相关业务逻辑，对应 Python 的 
+    /// _service.py
     /// </summary>
     public class HomeService : IHomeService
     {
@@ -48,7 +50,7 @@ namespace TomatoNovels.Services.Impl
         #endregion
 
         /// <inheritdoc />
-        public async Task<List<TopBookOut>> GetTopBooksAsync()
+        public async Task<List<TopBookResponseDto>> GetTopBooksAsync()
         {
             // 对应 get_top_books_service:
             // Book.query.order_by(Book.favorite_count.desc()).limit(30).all()
@@ -57,7 +59,7 @@ namespace TomatoNovels.Services.Impl
                 .Take(30)
                 .ToListAsync();
 
-            var result = new List<TopBookOut>();
+            var result = new List<TopBookResponseDto>();
 
             for (int i = 0; i < books.Count; i++)
             {
@@ -73,7 +75,7 @@ namespace TomatoNovels.Services.Impl
 
                 var coverUrl = BuildUrl(book.CoverUrl);
 
-                var item = new TopBookOut
+                var item = new TopBookResponseDto
                 {
                     Num = (i + 1).ToString("D2"),
                     Title = book.Title,
@@ -89,7 +91,7 @@ namespace TomatoNovels.Services.Impl
         }
 
         /// <inheritdoc />
-        public async Task<List<NewsOut>> GetNewsListAsync(int limit)
+        public async Task<List<NewsResponseDto>> GetNewsListAsync(int limit)
         {
             // News.query.order_by(News.created_at.desc()).limit(limit)
             var newsList = await _db.News
@@ -97,7 +99,7 @@ namespace TomatoNovels.Services.Impl
                 .Take(limit)
                 .ToListAsync();
 
-            return newsList.Select(n => new NewsOut
+            return newsList.Select(n => new NewsResponseDto
             {
                 Title = n.Title,
                 Path = $"/newsinfo/{n.Id}"
@@ -105,7 +107,7 @@ namespace TomatoNovels.Services.Impl
         }
 
         /// <inheritdoc />
-        public async Task<List<WriterOut>> GetWriterListAsync()
+        public async Task<List<WriterResponseDto>> GetWriterListAsync()
         {
             // palace_writers = User.query.filter(User.author_level == '殿堂作家').all()
             // golden_writers = User.query.filter(User.author_level == '金番作家').all()
@@ -121,7 +123,7 @@ namespace TomatoNovels.Services.Impl
 
             var hostPrefix = GetHostPrefix();
 
-            return writers.Select(w => new WriterOut
+            return writers.Select(w => new WriterResponseDto
             {
                 Title = w.Nickname ?? "",
                 Desc = string.IsNullOrWhiteSpace(w.Masterpiece)
@@ -134,7 +136,7 @@ namespace TomatoNovels.Services.Impl
         }
 
         /// <inheritdoc />
-        public async Task<RecommendResponse> GetRecommendBooksAsync()
+        public async Task<RecommendResponseDto> GetRecommendBooksAsync()
         {
             // 对应 get_recommend_books()
 
@@ -171,7 +173,7 @@ namespace TomatoNovels.Services.Impl
             var maleSample = Sample(maleBooks);
             var femaleSample = Sample(femaleBooks);
 
-            return new RecommendResponse
+            return new RecommendResponseDto
             {
                 Male = Convert(maleSample),
                 Female = Convert(femaleSample)
@@ -179,7 +181,7 @@ namespace TomatoNovels.Services.Impl
         }
 
         /// <inheritdoc />
-        public async Task<AdaptListResponse> GetAdaptListAsync(int? limit)
+        public async Task<AdaptListResponseDto> GetAdaptListAsync(int? limit)
         {
             // books = db.session.query(Book).options(selectinload(Book.author)).limit(limit).all()
             var query = _db.Books
@@ -200,14 +202,14 @@ namespace TomatoNovels.Services.Impl
                 Path = $"/bookinfo/{book.Id}"
             }).ToList();
 
-            return new AdaptListResponse
+            return new AdaptListResponseDto
             {
                 Data = list
             };
         }
 
         /// <inheritdoc />
-        public async Task<BookRankingOut> GetRankingListAsync(string readerType, string plotType)
+        public async Task<BookRankingResponseDto> GetRankingListAsync(string readerType, string plotType)
         {
             // query = db.session.query(Book).filter(Book.reader_type == reader_type, Book.plot_type == plot_type)
             var query = _db.Books
@@ -250,7 +252,7 @@ namespace TomatoNovels.Services.Impl
                 return list;
             }
 
-            return new BookRankingOut
+            return new BookRankingResponseDto
             {
                 PlotType = plotType,
                 Child = Convert(readBooks),
@@ -259,7 +261,7 @@ namespace TomatoNovels.Services.Impl
         }
 
         /// <inheritdoc />
-        public async Task<List<RecentUpdateItem>> GetRecentUpdatesAsync(int limit = 10)
+        public async Task<List<RecentUpdateItemResponseDto>> GetRecentUpdatesAsync(int limit = 10)
         {
             // Python:
             // db.session.query(Chapter)
@@ -275,7 +277,7 @@ namespace TomatoNovels.Services.Impl
                 .Take(limit)
                 .ToListAsync();
 
-            var updates = new List<RecentUpdateItem>();
+            var updates = new List<RecentUpdateItemResponseDto>();
 
             foreach (var chapter in chapters)
             {
@@ -286,7 +288,7 @@ namespace TomatoNovels.Services.Impl
                 if (book == null)
                     continue;
 
-                var item = new RecentUpdateItem
+                var item = new RecentUpdateItemResponseDto
                 {
                     Type = book.PlotType ?? "",
                     Title = book.Title,

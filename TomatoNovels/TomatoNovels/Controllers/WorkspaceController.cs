@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TomatoNovels.Controllers;
 using TomatoNovels.Shared.ApiResponse;
-using TomatoNovels.Controllers.Exceptions;
+using TomatoNovels.Core.Exceptions;
 using TomatoNovels.Shared.DTOs.Workspace;
 using TomatoNovels.Services;
 

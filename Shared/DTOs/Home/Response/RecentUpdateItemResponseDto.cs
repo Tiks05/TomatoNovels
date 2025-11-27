@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TomatoNovels.Shared.DTOs.Home
+namespace TomatoNovels.Shared.DTOs.Home.Response
 {
-    public class RecentUpdateItem
+    public class RecentUpdateItemResponseDto
     {
         [JsonPropertyName("type")]
         public string Type { get; set; } = "";

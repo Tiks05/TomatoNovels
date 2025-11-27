@@ -1,4 +1,4 @@
-﻿namespace TomatoNovels.Controllers.Exceptions
+﻿namespace TomatoNovels.Core.Exceptions
 {
     /// <summary>
     /// 自定义业务异常（对应 Flask 的 APIException）

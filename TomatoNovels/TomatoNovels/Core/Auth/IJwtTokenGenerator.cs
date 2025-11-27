@@ -1,4 +1,4 @@
-﻿namespace TomatoNovels.Controllers.Auth
+﻿namespace TomatoNovels.Core.Auth
 {
     public interface IJwtTokenGenerator
     {

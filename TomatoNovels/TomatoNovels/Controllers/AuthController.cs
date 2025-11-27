@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TomatoNovels.Controllers;
 using TomatoNovels.Shared.ApiResponse;
 using TomatoNovels.Services;
 using TomatoNovels.Shared.DTOs.Auth.Request;
@@ -34,7 +33,6 @@ namespace TomatoNovels.Controllers
                 );
             }
 
-            // 调用 Service（对应 Flask: login_or_register_service）
             var (user, token) = await _authService.LoginOrRegisterAsync(dto.Phone, dto.Password);
 
             if (user == null)
@@ -45,7 +43,7 @@ namespace TomatoNovels.Controllers
                 );
             }
 
-            // 生成 avatar URL（对应 Flask: request.host_url.rstrip('/') + user.avatar）
+            // 生成 avatar URL
             var request = _httpContextAccessor.HttpContext!.Request;
             var host = $"{request.Scheme}://{request.Host}";
             var avatarUrl = host.TrimEnd('/') + user.Avatar;

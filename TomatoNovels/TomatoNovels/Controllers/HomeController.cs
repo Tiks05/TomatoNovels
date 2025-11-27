@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TomatoNovels.Controllers;
 using TomatoNovels.Shared.ApiResponse;
-using TomatoNovels.Shared.DTOs.Home;
 using TomatoNovels.Services;
+using TomatoNovels.Shared.DTOs.Home.Request;
+using TomatoNovels.Shared.DTOs.Home.Response;
 
 namespace TomatoNovels.Controllers
 {
     /// <summary>
     /// 首页相关接口（对应 Flask home_bp）
     /// </summary>
-    [Route("api/home")]
+    [Route("api/home1")]
     public class HomeController : ApiControllerBase
     {
         private readonly IHomeService _homeService;
@@ -23,8 +24,10 @@ namespace TomatoNovels.Controllers
         /// 首页 Top 榜单
         /// </summary>
         [HttpGet("top-books")]
-        public async Task<ActionResult<ApiResponse<List<TopBookOut>>>> GetTopBooks()
+        public async Task<ActionResult<ApiResponse<List<TopBookResponseDto>>>> GetTopBooks(
+            [FromQuery] TopBooksRequestDto request)
         {
+            // 当前没有筛选条件，所以暂时不使用 request
             var list = await _homeService.GetTopBooksAsync();
             return Success(list);
         }
@@ -33,9 +36,10 @@ namespace TomatoNovels.Controllers
         /// 资讯列表
         /// </summary>
         [HttpGet("news-list")]
-        public async Task<ActionResult<ApiResponse<List<NewsOut>>>> GetNewsList(
-            [FromQuery] int limit = 8)
+        public async Task<ActionResult<ApiResponse<List<NewsResponseDto>>>> GetNewsList(
+            [FromQuery] NewsListRequestDto request)
         {
+            var limit = request.Limit ?? 8;
             var list = await _homeService.GetNewsListAsync(limit);
             return Success(list);
         }
@@ -44,8 +48,10 @@ namespace TomatoNovels.Controllers
         /// 推荐作家列表
         /// </summary>
         [HttpGet("writer-list")]
-        public async Task<ActionResult<ApiResponse<List<WriterOut>>>> GetWriterList()
+        public async Task<ActionResult<ApiResponse<List<WriterResponseDto>>>> GetWriterList(
+            [FromQuery] WriterListRequestDto request)
         {
+            // 当前没有过滤条件，request 可以先为空 DTO
             var list = await _homeService.GetWriterListAsync();
             return Success(list);
         }
@@ -54,8 +60,10 @@ namespace TomatoNovels.Controllers
         /// 男/女生推荐书籍
         /// </summary>
         [HttpGet("recommend")]
-        public async Task<ActionResult<ApiResponse<RecommendResponse>>> Recommend()
+        public async Task<ActionResult<ApiResponse<RecommendResponseDto>>> Recommend(
+            [FromQuery] RecommendRequestDto request)
         {
+            // 如果后面要按 readerType 等筛选，可以往 request 里加字段
             var resp = await _homeService.GetRecommendBooksAsync();
             return Success(resp);
         }
@@ -64,10 +72,10 @@ namespace TomatoNovels.Controllers
         /// 改编推荐列表
         /// </summary>
         [HttpGet("adaptlist")]
-        public async Task<ActionResult<ApiResponse<AdaptListResponse>>> AdaptList(
-            [FromQuery] int? limit)
+        public async Task<ActionResult<ApiResponse<AdaptListResponseDto>>> AdaptList(
+            [FromQuery] AdaptListRequestDto request)
         {
-            var resp = await _homeService.GetAdaptListAsync(limit);
+            var resp = await _homeService.GetAdaptListAsync(request.Limit);
             return Success(resp);
         }
 
@@ -75,11 +83,13 @@ namespace TomatoNovels.Controllers
         /// 排行榜（按读者频道 + 分类）
         /// </summary>
         [HttpGet("ranking")]
-        public async Task<ActionResult<ApiResponse<BookRankingOut>>> Ranking(
-            [FromQuery(Name = "reader_type")] string readerType,
-            [FromQuery(Name = "plot_type")] string plotType)
+        public async Task<ActionResult<ApiResponse<BookRankingResponseDto>>> Ranking(
+            [FromQuery] RankingRequestDto request)
         {
-            var data = await _homeService.GetRankingListAsync(readerType, plotType);
+            var data = await _homeService.GetRankingListAsync(
+                request.ReaderType,
+                request.PlotType
+            );
             return Success(data);
         }
 
@@ -87,9 +97,10 @@ namespace TomatoNovels.Controllers
         /// 最近更新章节
         /// </summary>
         [HttpGet("recent-updates")]
-        public async Task<ActionResult<ApiResponse<List<RecentUpdateItem>>>> RecentUpdates(
-            [FromQuery] int limit = 10)
+        public async Task<ActionResult<ApiResponse<List<RecentUpdateItemResponseDto>>>> RecentUpdates(
+            [FromQuery] RecentUpdatesRequestDto request)
         {
+            var limit = request.Limit ?? 10;
             var updates = await _homeService.GetRecentUpdatesAsync(limit);
             return Success(updates);
         }

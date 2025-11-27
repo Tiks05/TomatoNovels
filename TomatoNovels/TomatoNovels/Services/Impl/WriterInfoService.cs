@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using TomatoNovels.Controllers.Exceptions;
+using TomatoNovels.Core.Exceptions;
 using TomatoNovels.Data;
 using TomatoNovels.Shared.DTOs.WriterInfo;
 using TomatoNovels.Models;

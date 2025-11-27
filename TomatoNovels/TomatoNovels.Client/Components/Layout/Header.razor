@@ -1,0 +1,239 @@
+﻿@using TomatoNovels.Shared.DTOs.Home
+@using Microsoft.AspNetCore.Components.Web
+@inject Utils.NavigationHelper Nav
+@inject TomatoNovels.Client.Stores.UserStore UserStore
+@inject NavigationManager Navigation
+
+<header class="@($"header {(isScrolled ? "scrolled" : "")}")">
+    <div class="header-inner">
+        <!-- 左侧 Logo -->
+        <div class='header-left clickable' @onclick='() => GoTo("/home")'>
+            <img src="@Logo" class="nav-logo" />
+            <span class="logo-text">CMS</span>
+        </div>
+
+        <!-- 中间导航 -->
+        <nav class="nav-list">
+            @if (Menus is not null)
+            {
+                @foreach (var item in Menus)
+                {
+                    <span class="@($"nav-item {(IsActive(item.Path) ? "active" : "")}")"
+                          @onclick="() => GoTo(item.Path)">
+                        @item.Label
+                    </span>
+                }
+            }
+        </nav>
+
+        <!-- 右侧区域 -->
+        <div class="header-right">
+            <!-- element-plus 风格输入框 -->
+            <div class="@($"el-input search-input {(isScrolled ? "scrolled-input" : "")}")">
+                <input class="el-input__inner"
+                       placeholder="请输入书名或作者名"
+                       @bind="searchText"
+                       @bind:event="oninput"
+                       @onkeydown="HandleSearchKeyDown" />
+                <span class="el-input__suffix">
+                    <span class="el-input__suffix-inner">
+                        <span class="el-icon search-icon" @onclick="HandleSearchClick">
+                            <i class="icon-search"></i>
+                        </span>
+                    </span>
+                </span>
+            </div>
+
+            <span class="divider">|</span>
+
+            @if (!UserStore.IsAuthenticated)
+            {
+                <!-- 未登录：登录 / 注册 -->
+                <div class="auth-links">
+                    <span class="auth-link" @onclick='() => GoTo("/login")'>登录</span>
+                    <span class="auth-link" @onclick='() => GoTo("/login")'>注册</span>
+                </div>
+            }
+            else
+            {
+                <!-- 已登录：头像 + 下拉 -->
+                <div class="auth-dropdown"
+                     @onmouseover="ShowDropdown"
+                     @onmouseout="HideDropdownWithDelay">
+                    <div class="auth-avatar">
+                        <img src="@UserAvatar" class="avatar" />
+                        <span class="auth-username">@DisplayName</span>
+                    </div>
+
+                    @if (dropdownVisible)
+                    {
+                        <div class="dropdown-panel">
+                            <div class="dropdown-item" @onclick='() => GoTo("/profile")'>
+                                <img src="@IconUpdate" class="dropdown-icon" />
+                                <span>修改信息</span>
+                            </div>
+                            <div class="dropdown-item" @onclick="HandleLogoutAsync">
+                                <img src="@IconLogout" class="dropdown-icon" />
+                                <span>退出登录</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</header>
+
+@code {
+    // ==== 参数 ====
+    [Parameter]
+    public IEnumerable<MenuItemDto> Menus { get; set; } = Array.Empty<MenuItemDto>();
+
+    // ==== 静态资源路径 ====
+    private string Logo => "/assets/icons/logo/icons8-firebase-undefined-32.png";
+    private string DefaultAvatar => "/assets/icons/Profile/icons8-user-pulsar-color-32.png";
+    private string IconUpdate => "/assets/icons/update/icons8-update-windows-11-outline-32.png";
+    private string IconLogout => "/assets/icons/logout/icons8-logout-windows-11-filled-32.png";
+
+    // ==== 状态 ====
+    private string searchText = string.Empty;
+    private bool isScrolled;
+    private bool dropdownVisible;
+    private System.Threading.CancellationTokenSource? hideDropdownCts;
+
+    // ==== 计算属性 ====
+    // 根据你 Vue 写法推断：UserInfoDto 里应该有 Avatar / Nickname / Id 这些字段
+    private string UserAvatar =>
+        UserStore.User?.Avatar ?? DefaultAvatar;
+
+    private string DisplayName
+    {
+        get
+        {
+            var nickname = UserStore.User?.Nickname?.Trim();
+            if (!string.IsNullOrEmpty(nickname))
+                return nickname!;
+
+            var idStr = UserStore.User?.Id.ToString();
+            if (!string.IsNullOrEmpty(idStr) && idStr!.Length >= 3)
+                return idStr[..3];
+
+            return "用户";
+        }
+    }
+
+    private bool IsActive(string path)
+    {
+        path ??= string.Empty;
+
+        string Normalize(string p) => p.Trim().TrimStart('/');
+
+        var current = Normalize(Navigation.ToBaseRelativePath(Navigation.Uri));
+        var target = Normalize(path);
+
+        return string.Equals(current, target, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // ==== 导航 ====
+    private void GoTo(string path, bool forceReload = false)
+    {
+        Nav.GoTo(path, forceReload);
+    }
+
+    // ==== 搜索 ====
+    private async Task HandleSearchAsync()
+    {
+        var keyword = (searchText ?? string.Empty).Trim();
+        if (string.IsNullOrEmpty(keyword))
+            return;
+
+        var url = $"/search?keyword={Uri.EscapeDataString(keyword)}";
+        GoTo(url);
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await HandleSearchAsync();
+        }
+    }
+
+    private async Task HandleSearchClick()
+    {
+        await HandleSearchAsync();
+    }
+
+    // ==== 用户下拉 ====
+    private void ShowDropdown()
+    {
+        hideDropdownCts?.Cancel();
+        dropdownVisible = true;
+    }
+
+    private void HideDropdownWithDelay()
+    {
+        hideDropdownCts?.Cancel();
+        hideDropdownCts = new System.Threading.CancellationTokenSource();
+        _ = HideDropdownDelayedAsync(hideDropdownCts.Token);
+    }
+
+    private async Task HideDropdownDelayedAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(300, token);
+            if (!token.IsCancellationRequested)
+            {
+                dropdownVisible = false;
+                StateHasChanged();
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // ignore
+        }
+    }
+
+    private async Task HandleLogoutAsync()
+    {
+        await UserStore.LogoutAsync();
+        GoTo("/login");
+    }
+
+    // ==== 滚动状态（isScrolled） ====
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    [JSInvokable]
+    public void SetScrolled(bool scrolled)
+    {
+        if (isScrolled != scrolled)
+        {
+            isScrolled = scrolled;
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("tomatoHeader.initScrollObserver",
+                DotNetObjectReference.Create(this));
+        }
+    }
+}
+
+<script>
+    window.tomatoHeader = {
+        initScrollObserver: function (dotNetRef) {
+            const handler = () => {
+                const scrolled = window.scrollY > 10;
+                dotNetRef.invokeMethodAsync('SetScrolled', scrolled);
+            };
+            window.addEventListener('scroll', handler);
+            handler();
+        }
+    };
+</script>

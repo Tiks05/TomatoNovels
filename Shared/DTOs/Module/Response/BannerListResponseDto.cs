@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TomatoNovels.Shared.DTOs.Module
+namespace TomatoNovels.Shared.DTOs.Module.Response
 {
-    public class BannerItemDto
+    public class BannerListResponseDto
     {
         [JsonPropertyName("banner_url")]
         public string BannerUrl { get; set; } = string.Empty;

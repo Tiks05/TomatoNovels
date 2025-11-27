@@ -1,15 +1,15 @@
-﻿using TomatoNovels.Shared.DTOs.Home;
+﻿using TomatoNovels.Shared.DTOs.Home.Response;
 
 namespace TomatoNovels.Services
 {
     public interface IHomeService
     {
-        Task<List<TopBookOut>> GetTopBooksAsync();
-        Task<List<NewsOut>> GetNewsListAsync(int limit);
-        Task<List<WriterOut>> GetWriterListAsync();
-        Task<RecommendResponse> GetRecommendBooksAsync();
-        Task<AdaptListResponse> GetAdaptListAsync(int? limit);
-        Task<BookRankingOut> GetRankingListAsync(string readerType, string plotType);
-        Task<List<RecentUpdateItem>> GetRecentUpdatesAsync(int limit = 10);
+        Task<List<TopBookResponseDto>> GetTopBooksAsync();
+        Task<List<NewsResponseDto>> GetNewsListAsync(int limit);
+        Task<List<WriterResponseDto>> GetWriterListAsync();
+        Task<RecommendResponseDto> GetRecommendBooksAsync();
+        Task<AdaptListResponseDto> GetAdaptListAsync(int? limit);
+        Task<BookRankingResponseDto> GetRankingListAsync(string readerType, string plotType);
+        Task<List<RecentUpdateItemResponseDto>> GetRecentUpdatesAsync(int limit = 10);
     }
 }

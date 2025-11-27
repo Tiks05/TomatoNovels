@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.JSInterop
 @inject Utils.NavigationHelper NavHelper
+@inject IJSRuntime JS
 
 <!-- 整个登录页容器 -->
 <div class="relative w-[100vw] h-[100vh] overflow-hidden font-['PingFang_SC','Microsoft_YaHei',sans-serif]">
@@ -13,7 +15,7 @@
 
             <img src="@Logo" class="w-[26px] mr-[8px] object-contain" />
             番茄小说网
-
+    
             <span class="mx-[8px] text-white/70 text-[14px] select-none font-normal">|</span>
 
             <span class="text-[14px] cursor-pointer transition-colors duration-200 hover:text-[#ff8140]"
@@ -36,21 +38,19 @@
         </div>
     </div>
 
-    <!-- 懒加载封面（视频未加载时显示） -->
-    @if (!VideoLoaded)
-    {
-        <img src="@Poster"
-             alt="背景加载中..."
-             class="absolute top-0 left-0 w-full h-full object-cover z-0" />
-    }
+    <!-- 背景封面：永远作为背景兜底，不再受状态控制 -->
+    <img src="@Poster"
+         alt="背景加载中..."
+         class="absolute top-0 left-0 w-full h-full object-cover z-0" />
 
-    <!-- 背景视频：加载前先隐藏，加载完成后显示 -->
-    <video class="absolute top-0 left-0 w-full h-full object-cover z-0 @(VideoLoaded ? "" : "hidden")"
+    <!-- 背景视频：初始透明，准备好后由 JS 淡入 -->
+    <video id="welcomeVideo"
+           class="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-0 transition-opacity duration-700 ease-out"
            autoplay
            muted
            loop
            playsinline
-           @oncanplaythrough="OnVideoLoaded">
+           poster="@Poster">
         <source src="@VideoSrc" type="video/webm" />
     </video>
 
@@ -61,7 +61,6 @@
     <div class="absolute top-1/2 right-[100px] translate-y-[-50%] z-[2] flex justify-end w-full">
         <div class="w-[400px] p-[40px_32px] bg-white rounded-[16px] shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
             @Body
-            @* 子页面（短信登录/密码登录/重置密码） *@
         </div>
     </div>
 
@@ -72,14 +71,18 @@
 </div>
 
 @code {
-    // 对应 Vue 里的 videoLoaded
-    private bool VideoLoaded = false;
-
-    // 静态资源路径：放在 wwwroot/assets/... 下即可
-    private string Poster => "/assets/images/auth/welcome.png";
+    private string Poster => "/assets/images/auth/welcome.webp";
     private string VideoSrc => "/assets/movies/auth/welcome.webm";
     private string Logo => "/assets/icons/logo/icons8-firebase-undefined-32.png";
 
-    private void OnVideoLoaded()
-        => VideoLoaded = true;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // 首次渲染完，交给 JS 去处理懒加载和淡入
+            await JS.InvokeVoidAsync(
+                "authWelcome.initVideoLazyLoad",
+                "welcomeVideo");
+        }
+    }
 }
